@@ -36,13 +36,13 @@ print("Accessing Rpi3 db")
 #response = table.query(
 #    KeyConditionExpression=Key('topic').eq('temperature')) #FilterExpression=Attr('temperature').lt(30))
 response = table.get_item(Key={
-'UserID':1005
-'Username':
+'UserID':1005,
+'Username':'Virag'
 }
 )
 
 #for i in response['Item']:
-    #print(i['topic'], ":", i['timestamp'])
-    #print(json.dumps(i, cls=DecimalEncoder))
-items = response['Item']
+#    print(i['UserID'], ":", i['Username'])
+#    print(json.dumps(i, cls=DecimalEncoder))
+items = response['Item']['Temp']
 print(items)
