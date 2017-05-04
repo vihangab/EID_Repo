@@ -62,10 +62,10 @@ mqttc.loop_start()
 while 1==1:
     sleep(0.5)
     if connflag == True:
-        tempreading = uniform(20.0,25.0)
+        tempreading = uniform(15.0,25.0)
         timestamp = datetime.datetime.now().strftime("%Y%m%d-%H:%M:%S")
-	result_json = {'temperature' : tempreading  , 'timestamp' : timestamp }
-        mqttc.publish("temperature", json.dumps(result_json),0)
+        result_json={'UserID':1005,'Username':"Virag", 'Temp':tempreading}
+        mqttc.publish("temperature",json.dumps(result_json),0)
         #mqttc.publish("aws/things/VB_Rpi3/Temperature", tempreading, qos=1)
         print("msg sent: temperature " + "%.2f" % tempreading )
     else:
