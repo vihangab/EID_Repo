@@ -35,11 +35,12 @@ print("Accessing Rpi3 db")
 
 response = table.put_item(
    Item={
-        'UserID': 1005,
-        'Username': "Omkar",
-        'Temp': 35                          
+        'UserID': 1003,
+        'Username': "Virag",
+        'Temp': '33'
  }
 )
 
 print("PutItem succeeded:")
 print(json.dumps(response, indent=4, cls=DecimalEncoder))
+
