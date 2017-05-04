@@ -5,7 +5,6 @@ from boto3.dynamodb.conditions import Key, Attr
 import sys
 import time
 import datetime
-#import Adafruit_DHT
 import tornado.httpserver
 import tornado.websocket
 import tornado.ioloop
@@ -14,9 +13,7 @@ import datetime
 import time
 import json
 from tornado import web
-#from __future__ import print_function # Python 2/3 compatibility
 import boto3
-import json
 import decimal
 import pickle
 #from boto3.dynamodb.conditions import Key, Attr
@@ -26,14 +23,14 @@ import pickle
 #humidity
 # Helper class to convert a DynamoDB item to JSON.
 class DecimalEncoder(json.JSONEncoder):
-   def default(self, o):
-       if isinstance(o, decimal.Decimal):
+    def default(self, o):
+        if isinstance(o, decimal.Decimal):
            if o % 1 > 0:
                return float(o)
            else:
                return int(o)
-       return super(DecimalEncoder, self).default(o)
-       
+        return super(DecimalEncoder, self).default(o)
+
 class PythonObjectEncoder(json.JSONEncoder):
    def default(self, obj):
        if isinstance(obj, (list, dict, str, int, float, bool, type(None))):
@@ -64,37 +61,36 @@ class WSHandler(tornado.websocket.WebSocketHandler):
         self.write_message("Request : " + message)
         if message =="temp":
             dynamodb = boto3.resource('dynamodb', region_name='us-west-2')#, endpoint_url="https://dynamodb.us-west-2.amazonaws.com/")
-            table = dynamodb.Table('RPI_Data')
+            table = dynamodb.Table('RPI3_Data')
             print("Accessing Rpi3 db")
-            date_update = datetime.datetime.now().strftime("%Y-%m-%d")
-	    time_update = datetime.datetime.now().strftime("%H:%M")
-	    #humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
+            date_update = datetime.datetime.now().strftime("%Y%m%d")
+            time_update = datetime.datetime.now().strftime("%H:%M")
+            timestamp_current = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            #humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
             #temperature = 23#round(temperature,2)
             #humidity = 25#round(humidity,2)
             #response = table.query(
             #KeyConditionExpression=Key('topic').eq('temperature')) #FilterExpression=Attr('temperature').lt(30))
             #dynamodb = boto3.resource('dynamodb', region_name='us-west-2')#, endpoint_url="https://dynamodb.us-west-2.amazonaws.com/")
             #table = dynamodb.Table('RPI_Data')
-            response = table.get_item(Key={'Date':date_update,'Time':time_update})
-            #for i in response['Item']:
+            response = table.get_item(Key={
+"Date":date_update,
+"Time":time_update
+}
+)
             #print(i['topic'], ":", i['timestamp'])
             #print(json.dumps(i, cls=DecimalEncoder))
-            items = response['Item']['Temperature']
+            items = response['Item']['Humidity']
             print(items)
-	    items1 = response['Item']['Humidity']
-	    print(items1)
-            #json_data = json.dumps(items)
-            #json_time = json.dumps(datenow)
-            #print(json_data)
-            #print(json_time)
-            print('Incoming request:', message)
+            items1 = response['Item']['Temperature']
+            print(items1)
+            json_time = json.dumps(timestamp_current)
+            print(json_time)
             print('Incoming request:', message)
             print('Timestamp:',json_time)
-            print('Temperature:',items)
-	    print('Humiditiy:',items1)
             self.write_message("Request: " + message)
             self.write_message("Temperature :"+str(items))
-	    self.write_message("Humidity:"+str(items1))
+            self.write_message("Humidity:"+str(items1))
             self.write_message("Timestamp :"+ json_time)
         if message =="humidity":
             #humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
