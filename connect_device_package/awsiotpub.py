@@ -71,11 +71,17 @@ while 1==1:
         humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
         temperature = round(temperature,2)
         humidity = round(humidity,2)
-        date = datetime.datetime.now().strftime("%Y%m%d")
-        time = datetime.datetime.now().strftime("%H:%M")
-	result_json = {'Date':"date",'Time':"time",'Temperature':temperature,'Humidity':humidity}
+        date_update = datetime.datetime.now().strftime("%Y%m%d")
+        time_update= datetime.datetime.now().strftime("%H:%M")
+        result_json = {
+  "Date": date_update,
+  "Time": time_update,
+  "Temperature" : temperature,
+  "Humidity" : humidity
+}
         mqttc.publish("temperature", json.dumps(result_json),0)
         #mqttc.publish("aws/things/VB_Rpi3/Temperature", tempreading, qos=1)
         print("msg sent: temperature " + "%.2f" % temperature )
+	print("msg sent: humidity " + "%.2f" % humidity)
     else:
         print("waiting for connection...")

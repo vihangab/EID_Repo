@@ -17,7 +17,7 @@ def on_connect(client, userdata, flags, rc):
     print("Connection returned result: " + str(rc) )
     # Subscribing in on_connect() means that if we lose the connection and
     # reconnect then subscriptions will be renewed.
-    client.subscribe("aws/things/VB_Rpi3/Temperature" , 1 )
+    client.subscribe("temperature" , 1 )
 
 def on_message(client, userdata, msg):
     print("topic: "+msg.topic)
@@ -31,13 +31,21 @@ mqttc.on_connect = on_connect
 mqttc.on_message = on_message
 #mqttc.on_log = on_log
 
-awshost = "aekn89lpwmp2q.iot.us-west-2.amazonaws.com"
+#awshost = "aekn89lpwmp2q.iot.us-west-2.amazonaws.com"
+#awsport = 8883
+#clientId = "VB_Rpi3"
+#thingName = "VB_Rpi3"
+#caPath = "root-CA.crt"
+#certPath = "VB_Rpi3.cert.pem"
+#keyPath = "VB_Rpi3.private.key"
+awshost = "a2vp65ivl2lw2v.iot.us-west-2.amazonaws.com"
 awsport = 8883
-clientId = "VB_Rpi3"
-thingName = "VB_Rpi3"
+clientId = "MyRPi3"
+thingName = "MyRPi3"
 caPath = "root-CA.crt"
-certPath = "VB_Rpi3.cert.pem"
-keyPath = "VB_Rpi3.private.key"
+certPath = "MyRPi3.cert.pem"
+keyPath = "MyRPi3.private.key"
+
 
 mqttc.tls_set(caPath, certfile=certPath, keyfile=keyPath, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
 

@@ -29,15 +29,16 @@ class SetEncoder(json.JSONEncoder):
 
 dynamodb = boto3.resource('dynamodb', region_name='us-west-2')#, endpoint_url="https://dynamodb.us-west-2.amazonaws.com/")
 
-table = dynamodb.Table('RPI_Data')
+table = dynamodb.Table('RPI3_Data')
 
 print("Accessing Rpi3 db")
 
 response = table.put_item(
    Item={
-        'UserID': 1003,
-        'Username': "Virag",
-        'Temp': '33'
+        'Date': "20170503",
+        'Time': "11:10",
+        #'Temperature': '33',
+	#'Humidity':'21'
  }
 )
 
