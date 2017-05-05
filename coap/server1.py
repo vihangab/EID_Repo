@@ -15,8 +15,6 @@ import asyncio
 import aiocoap.resource as resource
 import aiocoap
 
-
-
 #code for dynamo_query here onwards
 class DecimalEncoder(json.JSONEncoder):
    def default(self, o):
@@ -39,12 +37,6 @@ class SetEncoder(json.JSONEncoder):
             return list(obj)
          return json.JSONEncoder.default(self, obj)
 
-dynamodb = boto3.resource('dynamodb', region_name='us-west-2')#, endpoint_url="https://dynamodb.us-west-2.amazonaws.com/")
-
-table = dynamodb.Table('RPI3_Data')
-
-print("Accessing Rpi3 db")
-
 #code for dynamo_query
 
 class BlockResource(resource.Resource):
@@ -65,13 +57,8 @@ class BlockResource(resource.Resource):
     async def render_put(self, request):
         print('PUT payload: %s' % request.payload)
         self.content = request.payload
-        if self.content == b"Refresh":
-           date_update = datetime.datetime.now().strftime("%Y%m%d")
-           response = table.put_item(Item={'Date': date_update,'Time': "Refresh", #'Temperature': '33', #'Humidity':'21'
-})
-           print("PutItem succeeded:")
-           print(json.dumps(response, indent=4, cls=DecimalEncoder))
-        payload = ("I've accepted the new payload. You may inspect it here in Python's repr format:\n\n%r"%self.content).encode('utf8')
+        payload = ("I've accepted the new payload. You may inspect it here in "\
+                "Python's repr format:\n\n%r"%self.content).encode('utf8')
         return aiocoap.Message(payload=payload)
 
 
@@ -119,28 +106,41 @@ class TimeResource(resource.ObservableResource):
 
     async def render_get(self, request):
         dynamodb = boto3.resource('dynamodb', region_name='us-west-2')#, endpoint_url="https://dynamodb.us-west-2.amazonaws.com/")
-        table = dynamodb.Table('RPI_Data')
+        table = dynamodb.Table('RPI3_Data')
         print("Accessing Rpi3 db")
-        response=table.get_item(Key={'UserID':1005,'Username':'Virag'})
-        #for i in response['Item']:
-        #print(i['topic'], ":", i['timestamp'])
-        #print(json.dumps(i, cls=DecimalEncoder))
-        items = response['Item']['Temp']
-        print(items)
+        date_update = datetime.datetime.now().strftime("%Y%m%d")
+        time_update = datetime.datetime.now().strftime("%H:%M")
+        response=table.get_item(Key={'Date':date_update,'Time':time_update})
         datenow = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        #json_data = json.dumps(items)
         json_time = json.dumps(datenow)
-        #print(json_data)
-        print(json_time)
+        #print(json_time)
         print('Timestamp:',json_time)
-        print('Temperature:',items)
-        self.content = ("Temperature : " + str(items)+"Timestamp :"+json_time).encode("ascii")
+        items = response['Item']
+        print('Date from DyanmoDB entire payload:',str(items))
+        #for i in response['Item']:
+        #    self.content = {'Temeperature': i['Temperature']
+        #    print(json.dumps(i, cls=DecimalEncoder))
+	#items = response['Item']
+        #self.content = str(items).encode("ascii")
+        self.content = str(items).encode('ascii')
         return aiocoap.Message(payload=self.content)
+
     async def render_put(self, request):
         print('PUT payload: %s' % request.payload)
         self.content = request.payload
-        payload = ("I've accepted the new payload. You may inspect it here in "\
-                "Python's repr format:\n\n%r"%self.content).encode('utf8')
+        payload = ("I have received data please stop").encode('utf8')
+        dynamodb = boto3.resource('dynamodb', region_name='us-west-2')#, endpoint_url="https://dynamodb.us-west-2.amazonaws.com/")
+        table = dynamodb.Table('RPI_Data')
+        print("Accessing Rpi db")
+        response = table.put_item(Item={
+        'UserID': 1001,
+        'Username': "Vihanga",
+        'System': str(self.content),
+	#'Humidity':'21'
+ }
+)
+        print("PutItem succeeded:")
+        print(json.dumps(response, indent=4, cls=DecimalEncoder))
         return aiocoap.Message(payload=payload)
 #class CoreResource(resource.Resource):
 #    """
