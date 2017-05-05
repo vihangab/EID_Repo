@@ -19,11 +19,18 @@ import json
 import datetime
 from time import sleep
 from random import uniform
+import RPi.GPIO as GPIO
+
+GPIO.setmode(GPIO.BOARD)
 
 connflag = False
-sensor = 22  #DHT22 sensor
-pin = 4      #GPIO Pin 4 (Pin 7)
+sensor =    22      #DHT22 sensor
+pin =       4       #GPIO Pin 4 (Pin 7)
+noisePin =  40      #GPIO Pin 21(Pin 40)
+gasPin =    38;     #GPIO Pin 30(Pin 38)
 
+GPIO.setup(noisePin, GPIO.IN)
+GPIO.setup(gasPin, GPIO.IN)
 
 def on_connect(client, userdata, flags, rc):
     global connflag
@@ -49,7 +56,6 @@ mqttc.on_message = on_message
 #certPath = "VB_Rpi3.cert.pem"
 #keyPath = "VB_Rpi3.private.key"
 
-
 awshost = "a2vp65ivl2lw2v.iot.us-west-2.amazonaws.com"
 awsport = 8883
 clientId = "MyRPi3"
@@ -67,21 +73,37 @@ mqttc.loop_start()
 
 while 1==1:
     sleep(0.5)
+
     if connflag == True:
         humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
         temperature = round(temperature,2)
         humidity = round(humidity,2)
+        noise = GPIO.input(noisePin)
+        gas = GPIO.input(gasPin)
+        sleep(1)
+        if noise:
+            noise_level = "Loud"
+        else:
+            noise_level = "Quiet"
+        if gas:
+            gas_level = "Polluted"
+        else:
+            gas_level = "Clean"
         date_update = datetime.datetime.now().strftime("%Y%m%d")
         time_update= datetime.datetime.now().strftime("%H:%M")
         result_json = {
-  "Date": date_update,
-  "Time": time_update,
-  "Temperature" : temperature,
-  "Humidity" : humidity
+  "Date":date_update,
+  "Time":time_update,
+  "Temperature":temperature,
+  "Humidity": humidity,
+  "Noise":noise_level,
+  "Gas":gas_level
 }
         mqttc.publish("temperature", json.dumps(result_json),0)
         #mqttc.publish("aws/things/VB_Rpi3/Temperature", tempreading, qos=1)
-        print("msg sent: temperature " + "%.2f" % temperature )
-	print("msg sent: humidity " + "%.2f" % humidity)
+        print("msg sent: temperature " + str(temperature))
+        print("msg sent: humidity " + str(humidity))
+        print("msg sent: noise " + noise_level)
+        print("msg sent: gas level " + gas_level)
     else:
         print("waiting for connection...")
