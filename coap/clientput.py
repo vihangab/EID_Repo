@@ -11,7 +11,6 @@ async def main():
     Example class which performs single PUT request to localhost
     port 5683 (official IANA assigned CoAP port), URI "/other/block".
     Request is sent 2 seconds after initialization.
-
     Payload is bigger than 1kB, and thus is sent as several blocks.
     """
 
