@@ -32,73 +32,6 @@ gasPin =    38;     #GPIO Pin 30(Pin 38)
 GPIO.setup(noisePin, GPIO.IN)
 GPIO.setup(gasPin, GPIO.IN)
 
-def on_connect(client, userdata, flags, rc):
-    global connflag
-    connflag = True
-    print("Connection returned result: " + str(rc) )
-
-def on_message(client, userdata, msg):
-    print(msg.topic+" "+str(msg.payload))
-
-#def on_log(client, userdata, level, buf):
-#    print(msg.topic+" "+str(msg.payload))
-
-mqttc = paho.Client()
-mqttc.on_connect = on_connect
-mqttc.on_message = on_message
-#mqttc.on_log = on_log
-
-awshost = "a2vp65ivl2lw2v.iot.us-west-2.amazonaws.com"
-awsport = 8883
-clientId = "MyRPi3"
-thingName = "MyRPi3"
-caPath = "root-CA.crt"
-certPath = "MyRPi3.cert.pem"
-keyPath = "MyRPi3.private.key"
-
-mqttc.tls_set(caPath, certfile=certPath, keyfile=keyPath, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
-
-mqttc.connect(awshost, awsport, keepalive=60)
-
-mqttc.loop_start()
-
-while 1==1:
-    sleep(0.5)
-
-    if connflag == True:
-        humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
-        temperature = round(temperature,2)
-        humidity = round(humidity,2)
-        noise = GPIO.input(noisePin)
-        gas = GPIO.input(gasPin)
-        sleep(1)
-        if noise:
-            noise_level = "Loud"
-        else:
-            noise_level = "Quiet"
-        if gas:
-            gas_level = "Polluted"
-        else:
-            gas_level = "Clean"
-        date_update = datetime.datetime.now().strftime("%Y%m%d")
-        time_update= datetime.datetime.now().strftime("%H:%M")
-        result_json = {
-  "Date":date_update,
-  "Time":time_update,
-  "Temperature":temperature,
-  "Humidity": humidity,
-  "Noise":noise_level,
-  "Gas":gas_level
-}
-        mqttc.publish("temperature", json.dumps(result_json),0)
-        #mqttc.publish("aws/things/VB_Rpi3/Temperature", tempreading, qos=1)
-        print("msg sent: temperature " + str(temperature))
-        print("msg sent: humidity " + str(humidity))
-        print("msg sent: noise " + noise_level)
-        print("msg sent: gas level " + gas_level)
-    else:
-        print("waiting for connection...")
-
 class BlockResource(resource.Resource):
     """
     Example resource which supports GET and PUT methods. It sends large
@@ -178,7 +111,7 @@ class TimeResource(resource.ObservableResource):
         return aiocoap.Message(payload=payload)
 # logging setup
 
-logging.basicConfig(level=logging.INFO
+logging.basicConfig(level=logging.INFO)
 logging.getLogger("coap-server").setLevel(logging.DEBUG)
 
 def main():
@@ -195,6 +128,76 @@ def main():
 
     asyncio.Task(aiocoap.Context.create_server_context(root))
 
+    
+    def on_connect(client, userdata, flags, rc):
+        global connflag
+        connflag = True
+        print("Connection returned result: " + str(rc) )
+
+    def on_message(client, userdata, msg):
+        print(msg.topic+" "+str(msg.payload))
+
+    #def on_log(client, userdata, level, buf):
+    #    print(msg.topic+" "+str(msg.payload))
+
+    mqttc = paho.Client()
+    mqttc.on_connect = on_connect
+    mqttc.on_message = on_message
+    #mqttc.on_log = on_log
+
+    awshost = "a2vp65ivl2lw2v.iot.us-west-2.amazonaws.com"
+    awsport = 8883
+    clientId = "MyRPi3"
+    thingName = "MyRPi3"
+    caPath = "root-CA.crt"
+    certPath = "MyRPi3.cert.pem"
+    keyPath = "MyRPi3.private.key"
+
+    mqttc.tls_set(caPath, certfile=certPath, keyfile=keyPath, cert_reqs=ssl.CERT_REQUIRED, tls_version=ssl.PROTOCOL_TLSv1_2, ciphers=None)
+
+    mqttc.connect(awshost, awsport, keepalive=60)
+
+    mqttc.loop_start()
+    count = 0
+
+    while (count<20):
+        sleep(0.5)
+
+        if connflag == True:
+            humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
+            temperature = round(temperature,2)
+            humidity = round(humidity,2)
+            noise = GPIO.input(noisePin)
+            gas = GPIO.input(gasPin)
+            sleep(1)
+            if noise:
+                noise_level = "Loud"
+            else:
+                noise_level = "Quiet"
+            if gas:
+                gas_level = "Polluted"
+            else:
+                gas_level = "Clean"
+            date_update = datetime.datetime.now().strftime("%Y%m%d")
+            time_update= datetime.datetime.now().strftime("%H:%M")
+            result_json = {
+      "Date":date_update,
+      "Time":time_update,
+      "Temperature":temperature,
+      "Humidity": humidity,
+      "Noise":noise_level,
+      "Gas":gas_level
+    }
+            mqttc.publish("temperature", json.dumps(result_json),0)
+            #mqttc.publish("aws/things/VB_Rpi3/Temperature", tempreading, qos=1)
+            print("msg sent: temperature " + str(temperature))
+            print("msg sent: humidity " + str(humidity))
+            print("msg sent: noise " + noise_level)
+            print("msg sent: gas level " + gas_level)
+        else:
+            print("waiting for connection...")
+
+    count = count +1
     asyncio.get_event_loop().run_forever()
 
 if __name__ == "__main__":
