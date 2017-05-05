@@ -15,6 +15,8 @@ import asyncio
 import aiocoap.resource as resource
 import aiocoap
 
+
+
 #code for dynamo_query here onwards
 class DecimalEncoder(json.JSONEncoder):
    def default(self, o):
@@ -37,6 +39,12 @@ class SetEncoder(json.JSONEncoder):
             return list(obj)
          return json.JSONEncoder.default(self, obj)
 
+dynamodb = boto3.resource('dynamodb', region_name='us-west-2')#, endpoint_url="https://dynamodb.us-west-2.amazonaws.com/")
+
+table = dynamodb.Table('RPI3_Data')
+
+print("Accessing Rpi3 db")
+
 #code for dynamo_query
 
 class BlockResource(resource.Resource):
@@ -57,8 +65,13 @@ class BlockResource(resource.Resource):
     async def render_put(self, request):
         print('PUT payload: %s' % request.payload)
         self.content = request.payload
-        payload = ("I've accepted the new payload. You may inspect it here in "\
-                "Python's repr format:\n\n%r"%self.content).encode('utf8')
+        if self.content == b"Refresh":
+           date_update = datetime.datetime.now().strftime("%Y%m%d")
+           response = table.put_item(Item={'Date': date_update,'Time': "Refresh", #'Temperature': '33', #'Humidity':'21'
+})
+           print("PutItem succeeded:")
+           print(json.dumps(response, indent=4, cls=DecimalEncoder))
+        payload = ("I've accepted the new payload. You may inspect it here in Python's repr format:\n\n%r"%self.content).encode('utf8')
         return aiocoap.Message(payload=payload)
 
 

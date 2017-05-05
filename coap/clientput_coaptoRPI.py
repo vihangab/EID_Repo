@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 import asyncio
+import sys
 
 from aiocoap import *
 
@@ -17,10 +18,12 @@ async def main():
     context = await Context.create_client_context()
 
     await asyncio.sleep(2)
-
-    payload = b"System On"
+    item = sys.argv[1]
+    payload = item.encode('utf-8')
+    print(payload)
+    print(sys.argv[1])
     request = Message(code=PUT, payload=payload)
-    request.opt.uri_host = '10.0.0.253'
+    request.opt.uri_host = '54.71.205.59'
     request.opt.uri_path = ("time",)
 
     response = await context.request(request).response
