@@ -17,7 +17,7 @@ async def main():
         print('Failed to fetch resource:')
         print(e)
     else:
-        print('Result: %s\n%r'%(response.code, response.payload))
+        print('Result: %s\n%r'%(response.code, response.payload.decode('utf-8')))
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
