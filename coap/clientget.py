@@ -18,6 +18,9 @@ async def main():
         print(e)
     else:
         print('Result: %s\n%r'%(response.code, response.payload.decode('utf-8')))
+        response1 = response.payload
+        Temperature = response1['Item']['Temeperature']
+        print(str(Temeperature)) 
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
