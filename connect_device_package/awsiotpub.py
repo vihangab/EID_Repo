@@ -42,7 +42,7 @@ import pickle
 GPIO.setmode(GPIO.BOARD)
 
 #Set Global variables
-connflag = False
+connflag = True
 sensor =    22      #DHT22 sensor
 pin =       4       #GPIO Pin 4 (Pin 7)
 noisePin =  40      #GPIO Pin 21(Pin 40)
@@ -136,7 +136,7 @@ mqttc.connect(awshost, awsport, keepalive=60)
 mqttc.loop_start()
 
 while 1==1:
-    sleep(30)
+    sleep(10)
     response = table1.get_item(Key={
         'UserID':1001,
         'Username':"Vihanga"
