@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import logging
 import asyncio
+import json
 
 from aiocoap import *
 
@@ -17,10 +18,12 @@ async def main():
         print('Failed to fetch resource:')
         print(e)
     else:
-        print('Result: %s\n%r'%(response.code, response.payload.decode('utf-8')))
-        response1 = response.payload
-        Temperature = response1['Item']['Temeperature']
-        print(str(Temeperature)) 
+        print('Result: %s\n%r'%(response.code, response.payload))
+        items = response.payload.decode('utf-8')
+        items = str(items)
+        #mylist = items.replace('{',' ').replace('\'',' ').replace(':',' ').replace(',',' ').split()
+        #print(mylist) 
+        print(items) 
 
 if __name__ == "__main__":
     asyncio.get_event_loop().run_until_complete(main())
