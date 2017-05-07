@@ -1,0 +1,8 @@
+<RCC>
+  <qresource prefix="newPrefix">
+    <file>flatirons.jpg</file>
+  </qresource>
+  <qresource prefix="newPrefix">
+    <file>weather.jpg</file>
+  </qresource>
+</RCC>

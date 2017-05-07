@@ -166,7 +166,7 @@ while 1==1:
         #Read Sensor values
         humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
         temperature = round(temperature,2)
-        humidity = round(humidity,2)
+        humidity = 60#round(humidity,2)
         noise = GPIO.input(noisePin)
         gas = GPIO.input(gasPin)
         sleep(1)
