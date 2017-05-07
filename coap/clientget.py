@@ -21,7 +21,7 @@ async def main():
         print('Result: %s\n%r'%(response.code, response.payload))
         items = response.payload.decode('utf-8')
         items = str(items)
-        #mylist = items.replace('{',' ').replace('\'',' ').replace(':',' ').replace(',',' ').split()
+        #mylist = items.replace('{',' ').replace('\'',' ').replace(':',' ').replace(',',' ').split('    ')
         #print(mylist) 
         print(items) 
 
