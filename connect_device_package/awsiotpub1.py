@@ -36,6 +36,9 @@ import boto3
 import json
 import decimal
 import pickle
+from flask import Flask, render_template
+from glob import glob
+
 
 
 #Set GPIO mode to Board pins
@@ -105,6 +108,10 @@ def on_message(client, userdata, msg):
 #def on_log(client, userdata, level, buf):
 #    print(msg.topic+" "+str(msg.payload))
 
+app = Flask(__name__)
+
+path = os.path.dirname(os.path.realpath(__file__))
+
 mqttc = paho.Client()
 mqttc.on_connect = on_connect
 mqttc.on_message = on_message
@@ -162,11 +169,33 @@ while 1==1:
         # To draw a rectangle in each cars
         for (x,y,w,h) in cars:
                 cv2.rectangle(frames,(x,y),(x+w,y+h),(0,0,255),2)
+
+        def get_photos():
+            photo_files = glob("%s/static/photos/*.jpg" % path)
+            photos = ["%s/static/photos/" % photo.split('/')[-1] for photo in photo_files]
+            return sorted(photos, reverse=True)
+
+            @app.route('/')
+            def index():
+                photos = get_photos()
+                return render_template('index2.html', photos=photos)
+
+            @app.route('/capture/')
+            def capture():
+                timestamp = datetime.now().isoformat()
+                photo_path = '%s/static/photos/.jpg' % (path, timestamp)
+                imwrite(photo_path,'download.jpg')
+                photos = get_photos()
+                return render_template('index2.html', photos=photos)
+
+            @app.route('/view/<photo>/')
+            def view(photo):
+                return render_template('view.html', photo=photo)
         
         #Read Sensor values
         humidity, temperature = Adafruit_DHT.read_retry(sensor, pin)
         temperature = round(temperature,2)
-        humidity = 60#round(humidity,2)
+        humidity = round(humidity,2)
         noise = GPIO.input(noisePin)
         gas = GPIO.input(gasPin)
         sleep(1)
@@ -200,3 +229,6 @@ while 1==1:
         print("msg sent: Vehicle count= "+str(len(cars)))
     else:
         print("waiting for connection...")
+
+if __name__ == '__main__':
+    app.run(debug=True, host='0.0.0.0')
